@@ -1,4 +1,4 @@
-package dev.tornaco.vangogh
+package dev.tornaco.vangogh.sample
 
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
