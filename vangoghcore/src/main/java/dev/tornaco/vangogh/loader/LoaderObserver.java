@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 
 import dev.tornaco.vangogh.common.Error;
 import dev.tornaco.vangogh.media.Image;
-import dev.tornaco.vangogh.queue.Request;
+import dev.tornaco.vangogh.media.ImageSource;
 
 /**
  * Created by guohao4 on 2017/8/24.
@@ -12,9 +12,10 @@ import dev.tornaco.vangogh.queue.Request;
  */
 
 public interface LoaderObserver {
-    void onCreate();
 
-    void onImageLoading(@NonNull Request request);
+    void onImageLoading(@NonNull ImageSource source);
+
+    void onProgressUpdate(float progress);
 
     void onImageReady(@NonNull Image image);
 

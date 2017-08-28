@@ -1,8 +1,10 @@
 package dev.tornaco.vangogh.media;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * Created by guohao4 on 2017/8/24.
@@ -11,9 +13,9 @@ import android.support.annotation.NonNull;
 
 public interface Image {
 
-    @NonNull
-    Bitmap asBitmap();
+    @Nullable
+    Bitmap asBitmap(@NonNull Context context);
 
-    @NonNull
-    Drawable asDrawable();
+    @Nullable
+    Drawable asDrawable(@NonNull Context context);
 }
