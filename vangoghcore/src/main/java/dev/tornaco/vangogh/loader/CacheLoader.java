@@ -3,9 +3,7 @@ package dev.tornaco.vangogh.loader;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import dev.tornaco.vangogh.VangoghContext;
 import dev.tornaco.vangogh.loader.cache.CacheManager;
-import dev.tornaco.vangogh.loader.cache.CachePolicy;
 import dev.tornaco.vangogh.media.Image;
 import dev.tornaco.vangogh.media.ImageSource;
 
@@ -17,6 +15,10 @@ import dev.tornaco.vangogh.media.ImageSource;
 class CacheLoader extends BaseImageLoader {
 
     private CacheManager cacheManager;
+
+    public CacheLoader() {
+        cacheManager = CacheManager.getInstance();
+    }
 
     @Override
     public int priority() {
@@ -31,14 +33,6 @@ class CacheLoader extends BaseImageLoader {
     @Nullable
     @Override
     Image doLoad(@NonNull ImageSource source, @Nullable LoaderObserver observer) {
-        synchronized (this) {
-            if (cacheManager == null) {
-                cacheManager = CacheManager.newInstance(getContext(),
-                        CachePolicy.builder().memCacheSize(VangoghContext.getMemCachePoolSize())
-                                .diskCacheDir(VangoghContext.getDiskCacheDir()).build());
-            }
-        }
-
         Image image = source.isSkipMemoryCache() ? null : cacheManager.getMemCache().get(source);
         if (image == null) {
             image = source.isSkipDiskCache() ? null : cacheManager.getDiskCache().get(source);

@@ -1,40 +1,41 @@
 package dev.tornaco.vangogh.loader.cache;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.LruCache;
 
 import junit.framework.Assert;
 
+import org.newstand.logger.Logger;
+
+import dev.tornaco.vangogh.media.BitmapImage;
 import dev.tornaco.vangogh.media.Image;
 import dev.tornaco.vangogh.media.ImageSource;
-import lombok.Getter;
 
 /**
  * Created by guohao4 on 2017/8/28.
  * Email: Tornaco@163.com
  */
 
-public class MemoryCache implements Cache<ImageSource, Image> {
-
-    @Getter
-    private Context context;
+class MemoryCache implements Cache<ImageSource, Image> {
 
     private LruCache<ImageSource, Image> mLruCache;
 
-    public MemoryCache(CachePolicy cachePolicy) {
-        long poolSize = cachePolicy.getMemCacheSize();
-        mLruCache = new LruCache<ImageSource, Image>((int) poolSize) {
+    MemoryCache(int poolSize) {
+        Logger.v("MemoryCache, using pool size: %s", poolSize);
+
+        mLruCache = new LruCache<ImageSource, Image>(poolSize) {
+            @SuppressWarnings("ConstantConditions")
             @Override
             protected int sizeOf(ImageSource key, Image value) {
-                if (value == null || value.asBitmap(context) == null) return 0;
-                return value.asBitmap(context).getWidth() * value.asBitmap(context).getHeight();
+                if (value == null || value.asBitmap(key.getContext()) == null) return 1;
+                return value.asBitmap(key.getContext()).getWidth() * value.asBitmap(key.getContext()).getHeight() + 1;
             }
 
             @Override
             protected void entryRemoved(boolean evicted, ImageSource key, Image oldValue, Image newValue) {
                 super.entryRemoved(evicted, key, oldValue, newValue);
+                oldValue.recycle();
                 oldValue = null;
             }
         };
@@ -51,8 +52,14 @@ public class MemoryCache implements Cache<ImageSource, Image> {
     public boolean put(@NonNull ImageSource source, @NonNull Image image) {
         Assert.assertNotNull(source);
         Assert.assertNotNull(image);
-        if (image.asBitmap(context) == null)
+        if (image.asBitmap(source.getContext()) == null)
             return false;
+
+        // Only for debug.
+        if (image instanceof BitmapImage) {
+            ((BitmapImage) image).setAlias("in-mem-cache");
+        }
+
         mLruCache.put(source, image);
         return true;
     }
@@ -60,10 +67,5 @@ public class MemoryCache implements Cache<ImageSource, Image> {
     @Override
     public void clear() {
 
-    }
-
-    @Override
-    public void wire(@NonNull Context context) {
-        this.context = context;
     }
 }

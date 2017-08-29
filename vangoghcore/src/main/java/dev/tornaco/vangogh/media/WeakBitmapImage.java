@@ -34,4 +34,17 @@ public class WeakBitmapImage implements Image {
     public Drawable asDrawable(@NonNull Context context) {
         return null;
     }
+
+    @Override
+    public void recycle() {
+        if (reference != null && reference.get() != null && !reference.get().isRecycled()) {
+            reference.get().recycle();
+            reference = null;
+        }
+    }
+
+    @Override
+    public boolean cachable() {
+        return false;
+    }
 }

@@ -1,9 +1,13 @@
 package dev.tornaco.vangogh.request;
 
+import android.content.Context;
+
 import dev.tornaco.vangogh.display.ImageApplier;
 import dev.tornaco.vangogh.display.ImageDisplayer;
 import dev.tornaco.vangogh.display.ImageEffect;
+import dev.tornaco.vangogh.loader.Loader;
 import dev.tornaco.vangogh.loader.LoaderObserver;
+import dev.tornaco.vangogh.media.Image;
 import dev.tornaco.vangogh.media.ImageSource;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,6 +24,8 @@ import lombok.ToString;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @ToString
 public class ImageRequest {
+    private Context context;
+
     private int id;
     private String alias;
     private long requestTimeMills;
@@ -31,6 +37,8 @@ public class ImageRequest {
     private LoaderObserver observer;
 
     private boolean dirty;
+
+    private Loader<Image> loader;
 
     public void setDirty(boolean dirty) {
         this.dirty = dirty;

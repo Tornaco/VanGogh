@@ -1,6 +1,5 @@
 package dev.tornaco.vangogh.request;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -15,7 +14,6 @@ import java.util.concurrent.Executors;
 
 import dev.tornaco.vangogh.display.ImageEffect;
 import dev.tornaco.vangogh.media.Image;
-import lombok.Getter;
 
 /**
  * Created by guohao4 on 2017/8/25.
@@ -30,11 +28,7 @@ class DisplayRequestDispatcherTornaco implements DisplayRequestDispatcher {
 
     private final Set<Integer> DIRTY_REQUESTS = new HashSet<>();
 
-    @Getter
-    private Context context;
-
-    DisplayRequestDispatcherTornaco(Context context) {
-        this.context = context;
+    DisplayRequestDispatcherTornaco() {
         this.mainThreadHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
@@ -64,14 +58,18 @@ class DisplayRequestDispatcherTornaco implements DisplayRequestDispatcher {
                     return;
                 }
                 ImageEffect[] effect = displayRequest.getEffect();
-                Image effectedImage = displayRequest.getImage();
+                Image readyImage = displayRequest.getImage();
+                Image effectedImage = readyImage;
                 if (effect != null) {
                     for (ImageEffect e : effect) {
-                        effectedImage = e.process(getContext(), effectedImage);
+                        effectedImage = e.process(displayRequest.getContext(), effectedImage);
                     }
                     displayRequest.setImage(effectedImage);
                 }
                 mainThreadHandler.obtainMessage(displayRequest.getId(), displayRequest).sendToTarget();
+
+                // Publish used image.
+                ImageManager.getInstance().onImageUsedInvalidate(displayRequest.getImageSource(), readyImage);
             }
         });
     }

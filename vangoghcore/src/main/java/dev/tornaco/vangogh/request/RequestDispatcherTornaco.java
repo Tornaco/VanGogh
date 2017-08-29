@@ -1,6 +1,5 @@
 package dev.tornaco.vangogh.request;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -16,7 +15,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
-import dev.tornaco.vangogh.VangoghContext;
 import dev.tornaco.vangogh.common.Error;
 import dev.tornaco.vangogh.loader.LoaderObserver;
 import dev.tornaco.vangogh.loader.LoaderObserverAdapter;
@@ -24,7 +22,7 @@ import dev.tornaco.vangogh.loader.LoaderProxy;
 import dev.tornaco.vangogh.media.DrawableImage;
 import dev.tornaco.vangogh.media.Image;
 import dev.tornaco.vangogh.media.ImageSource;
-import lombok.Getter;
+import lombok.Synchronized;
 
 /**
  * Created by guohao4 on 2017/8/24.
@@ -39,17 +37,14 @@ public class RequestDispatcherTornaco implements RequestDispatcher {
 
     private final Map<ImageRequest, RequestFuture> REQUESTS = new HashMap<>();
 
-    @Getter
-    private Context context;
-
-    public RequestDispatcherTornaco(Context context) {
-        this.context = context;
-        this.proxy = LoaderProxy.newInstance(context);
-        this.executorService = Executors.newFixedThreadPool(VangoghContext.getRequestPoolSize());
-        this.displayRequestDispatcher = new DisplayRequestDispatcherTornaco(context);
+    public RequestDispatcherTornaco(int poolSize) {
+        this.proxy = new LoaderProxy();
+        this.executorService = Executors.newFixedThreadPool(poolSize);
+        this.displayRequestDispatcher = new DisplayRequestDispatcherTornaco();
     }
 
     @Override
+    @Synchronized
     public void dispatch(@NonNull final ImageRequest imageRequest) {
         Logger.v("RequestDispatcherTornaco, dispatch: %s", imageRequest);
         Assert.assertNotNull("ImageRequest is null", imageRequest);
@@ -58,13 +53,12 @@ public class RequestDispatcherTornaco implements RequestDispatcher {
         // Apply placeholder.
         final ImageSource source = imageRequest.getImageSource();
         if (source.getPlaceHolder() > 0) {
-            Drawable placeHolderDrawable = VangoghContext.getContext().getResources()
+            Drawable placeHolderDrawable = imageRequest.getContext().getResources()
                     .getDrawable(source.getPlaceHolder());
             if (placeHolderDrawable != null) {
                 displayRequestDispatcher.dispatch(new DisplayRequest(
                         new DrawableImage(placeHolderDrawable),
-                        imageRequest, "no-applier"
-                ));
+                        imageRequest, "no-applier"));
             }
         }
 
@@ -91,11 +85,9 @@ public class RequestDispatcherTornaco implements RequestDispatcher {
                     @Override
                     public void onImageReady(@NonNull Image image) {
                         if (observer != null) observer.onImageReady(image);
-                        Logger.v("RequestDispatcherTornaco.LoaderObserverAdapter, onImageReady: %s", image);
+                        Logger.v("RequestDispatcherTornaco.LoaderObserverAdapter, onImageUsedInvalidate: %s", image);
 
                         RequestDispatcherTornaco.this.onImageReady(imageRequest, image);
-
-                        ImageManager.getInstance().onImageReady(source, image);
                     }
                 }));
     }
@@ -108,6 +100,7 @@ public class RequestDispatcherTornaco implements RequestDispatcher {
         Logger.i("RequestDispatcherTornaco, cancel future: %s", future);
 
         if (future == null) return false;
+
         // FIXME. Too ugly.
         // Hook ID.
         DisplayRequest proxyRequest = new DisplayRequest(null, ImageRequest.builder().id(future.id).build(), null);

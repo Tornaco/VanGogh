@@ -4,7 +4,6 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import dev.tornaco.vangogh.VangoghContext;
 import dev.tornaco.vangogh.media.DrawableImage;
 import dev.tornaco.vangogh.media.Image;
 import dev.tornaco.vangogh.media.ImageSource;
@@ -32,10 +31,10 @@ public class FallbackLoader extends BaseImageLoader {
         if (source.getFallback() > 0) {
             Drawable fallbackDrawable = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                fallbackDrawable = VangoghContext.getContext().getResources()
-                        .getDrawable(source.getFallback(), VangoghContext.getContext().getTheme());
+                fallbackDrawable = source.getContext().getResources()
+                        .getDrawable(source.getFallback(), source.getContext().getTheme());
             } else {
-                fallbackDrawable = VangoghContext.getContext().getResources()
+                fallbackDrawable = source.getContext().getResources()
                         .getDrawable(source.getFallback());
             }
             if (fallbackDrawable != null) {

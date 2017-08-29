@@ -3,18 +3,21 @@ package dev.tornaco.vangogh;
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.widget.ImageView;
 
 import junit.framework.Assert;
 
-import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import dev.tornaco.vangogh.display.ImageApplier;
 import dev.tornaco.vangogh.display.ImageDisplayer;
 import dev.tornaco.vangogh.display.ImageEffect;
 import dev.tornaco.vangogh.display.ImageViewDisplayer;
+import dev.tornaco.vangogh.loader.Loader;
 import dev.tornaco.vangogh.loader.LoaderObserver;
+import dev.tornaco.vangogh.media.Image;
 import dev.tornaco.vangogh.media.ImageSource;
 import dev.tornaco.vangogh.request.ImageRequest;
 import dev.tornaco.vangogh.request.RequestDispatcherTornaco;
@@ -28,56 +31,87 @@ import lombok.Getter;
 
 public class Vangogh {
 
+    private static final Vangogh sMe = new Vangogh();
+
     private RequestLooper mLooper;
 
-    private Vangogh(Context context) {
-        mLooper = RequestLooper.newInstance(new RequestDispatcherTornaco(context));
+    /**
+     * @param fragment Instance of your fragment.
+     * @return Vangogh single instance.
+     */
+    public static VangoghRequest with(Fragment fragment) {
+        return with((fragment.getActivity().getApplicationContext()));
     }
 
-    public static void setDiskCacheDir(File diskCacheDir) {
-        VangoghContext.setDiskCacheDir(diskCacheDir);
+    /**
+     * @param c The application context.
+     * @return Vangogh single instance.
+     */
+    public static VangoghRequest with(Context c) {
+        return with(c.getApplicationContext(), VangoghConfig.defaultConfig(c));
     }
 
-    public static void setRequestPoolSize(int requestPoolSize) {
-        VangoghContext.setRequestPoolSize(requestPoolSize);
+    /**
+     * @param c      The application context.
+     * @param config The {@link VangoghConfig} you want to use for.
+     * @return Vangogh single instance.
+     */
+    public static VangoghRequest with(Context c, VangoghConfig config) {
+        Assert.assertNotNull("Context can not be null", c);
+        Assert.assertNotNull("VangoghConfig can not be null", config);
+        return sMe.createRequest(c, config);
     }
 
-    public static Vangogh from(Context context) {
-        Assert.assertNotNull("Context is null", context);
-        VangoghContext.setContext(context.getApplicationContext());
-        return new Vangogh(context);
+    private synchronized VangoghRequest createRequest(Context c, VangoghConfig config) {
+        VangoghConfigManager.getInstance().updateConfig(config);
+
+        if (mLooper == null) {
+            mLooper = RequestLooper.newInstance(new RequestDispatcherTornaco(config.getRequestPoolSize()));
+        }
+
+        VangoghRequest request = new VangoghRequest();
+        request.looper = mLooper;
+        request.context = c;
+        return request;
     }
 
-    public VangoghRequest load(String url) {
-        ImageSource source = new ImageSource();
-        source.setUrl(url);
-        VangoghRequest vangoghRequest = new VangoghRequest();
-        vangoghRequest.source(source);
-        return vangoghRequest;
+    /**
+     * Pause the {@link Vangogh}, all new request will be saved as pending.
+     */
+    public static void pause() {
+        sMe.mLooper.pause();
     }
 
-    public VangoghRequest load(Uri uri) {
-        return load(uri.toString());
+    /**
+     * Resume the {@link Vangogh}, pending request will be execute.
+     */
+    public static void resume() {
+        sMe.mLooper.resume();
     }
 
-    public void pause() {
-        mLooper.pause();
+    /**
+     * Clear all pending requests if exists.
+     *
+     * @return {@link ImageRequest} array that has been cleared,
+     * it will return an empty array if no pending requests found.
+     */
+    public static ImageRequest[] clearPendingRequests() {
+        return sMe.mLooper.clearPendingRequests();
     }
 
-    public void resume() {
-        mLooper.resume();
-    }
-
-    public ImageRequest[] clearPendingRequests() {
-        return mLooper.clearPendingRequests();
-    }
-
-    public void quit() {
-        mLooper.quit();
+    /**
+     * Quit and clean up.
+     */
+    public static void quit() {
+        sMe.mLooper.quit();
     }
 
     @Getter
-    public class VangoghRequest {
+    public static class VangoghRequest {
+
+        private RequestLooper looper;
+
+        private Context context;
 
         private ImageSource source;
         private ImageDisplayer imageDisplayer;
@@ -86,9 +120,18 @@ public class Vangogh {
 
         private LoaderObserver observer;
 
-        private VangoghRequest source(ImageSource source) {
+        private Loader<Image> loader;
+
+        public VangoghRequest load(String url) {
+            ImageSource source = new ImageSource();
+            source.setContext(context);
+            source.setUrl(url);
             this.source = source;
             return this;
+        }
+
+        public VangoghRequest load(Uri uri) {
+            return load(uri.toString());
         }
 
         public VangoghRequest placeHolder(@DrawableRes int drawableRes) {
@@ -126,15 +169,28 @@ public class Vangogh {
             return this;
         }
 
-        public ImageRequest into(ImageView imageView) {
+        public VangoghRequest usingLoader(@NonNull Loader<Image> loader) {
+            Assert.assertNotNull("Loader is null", loader);
+            this.loader = loader;
+            return this;
+        }
+
+        public ImageRequest into(@NonNull ImageView imageView) {
+            Assert.assertNotNull(imageView);
             return into(new ImageViewDisplayer(imageView));
         }
 
-        public ImageRequest into(ImageDisplayer imageDisplayer) {
+        public ImageRequest into(@NonNull ImageDisplayer imageDisplayer) {
             this.imageDisplayer = imageDisplayer;
+
+            // Check if we got valid params.
+            Assert.assertNotNull(this.source);
+            Assert.assertNotNull(this.imageDisplayer);
+            Assert.assertNotNull(this.context);
 
             ImageRequest imageRequest =
                     ImageRequest.builder()
+                            .context(context)
                             .requestTimeMills(System.currentTimeMillis())
                             .alias("abc")
                             .displayer(this.imageDisplayer)
@@ -144,7 +200,7 @@ public class Vangogh {
                             .id(RequestIdFactory.next())
                             .observer(observer)
                             .build();
-            mLooper.onNewRequest(imageRequest);
+            looper.onNewRequest(imageRequest);
             return imageRequest;
         }
 

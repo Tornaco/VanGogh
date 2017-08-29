@@ -1,7 +1,9 @@
 package dev.tornaco.vangogh.media;
 
+import android.content.Context;
 import android.support.annotation.DrawableRes;
 
+import dev.tornaco.vangogh.VangoghConfig;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,6 +16,9 @@ import lombok.ToString;
 @Getter
 @Setter
 public class ImageSource implements Cloneable {
+    private Context context;
+    private VangoghConfig config;
+
     private String url;
     @DrawableRes
     private int placeHolder;
@@ -35,6 +40,12 @@ public class ImageSource implements Cloneable {
         ImageSource source = (ImageSource) o;
 
         return url.equals(source.url);
+    }
+
+    public void recycle() {
+        config = null;
+        context = null;
+        url = null;
     }
 
     @Override

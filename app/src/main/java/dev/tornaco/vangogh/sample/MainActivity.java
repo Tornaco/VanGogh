@@ -14,6 +14,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import java.util.List;
+
 import dev.tornaco.vangogh.Vangogh;
 import dev.tornaco.vangogh.display.CircleImageEffect;
 import dev.tornaco.vangogh.display.appliers.FadeInApplier;
@@ -43,84 +45,88 @@ public class MainActivity extends AppCompatActivity {
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        vangogh.pause();
+                        Vangogh.pause();
                     }
                 });
         findViewById(R.id.button_clear)
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        vangogh.clearPendingRequests();
+                        Vangogh.clearPendingRequests();
                     }
                 });
         findViewById(R.id.button_resume)
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        vangogh.resume();
+                        Vangogh.resume();
                     }
                 });
 
         setupView();
     }
 
-    Vangogh vangogh;
-
-
     private void setupView() {
-        vangogh = Vangogh.from(MainActivity.this);
-
         listView = (ListView) findViewById(R.id.list);
 
-        listView.setAdapter(new BaseAdapter() {
+        new Thread(new Runnable() {
             @Override
-            public int getCount() {
-                return 1000;
+            public void run() {
+                final List<Photo> photos = new PhotoLoader(getApplicationContext())
+                        .load();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        listView.setAdapter(new BaseAdapter() {
+                            @Override
+                            public int getCount() {
+                                return photos.size();
+                            }
+
+                            @Override
+                            public Object getItem(int position) {
+                                return null;
+                            }
+
+                            @Override
+                            public long getItemId(int position) {
+                                return position;
+                            }
+
+                            @Override
+                            public View getView(int position, View convertView, ViewGroup parent) {
+                                ViewHolder holder;
+                                if (convertView == null) {
+                                    convertView = LayoutInflater.from(getApplicationContext())
+                                            .inflate(R.layout.list_item, parent, false);
+                                    holder = new ViewHolder(convertView);
+                                    convertView.setTag(holder);
+                                } else {
+                                    holder = (ViewHolder) convertView.getTag();
+                                }
+
+                                Vangogh.with(getApplicationContext())
+                                        .load(photos.get(position).getPath())
+                                        .effect(new CircleImageEffect())
+                                        .applier(new FadeInApplier())
+                                        .placeHolder(R.mipmap.ic_launcher_round)
+                                        .into(holder.getImageView());
+
+                                return convertView;
+                            }
+                        });
+                    }
+                });
             }
+        }).start();
 
-            @Override
-            public Object getItem(int position) {
-                return null;
-            }
 
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                ViewHolder holder;
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(getApplicationContext())
-                            .inflate(R.layout.list_item, parent, false);
-                    holder = new ViewHolder(convertView);
-                    convertView.setTag(holder);
-                } else {
-                    holder = (ViewHolder) convertView.getTag();
-                }
-
-                holder.getImageView().setImageBitmap(null);
-                holder.getImageView().setImageDrawable(null);
-
-                // https://i.imgur.com/iiufiZW.jpg
-                vangogh.load("assets://image/test.jpg")
-                        .effect(new CircleImageEffect())
-                        .applier(new FadeInApplier())
-                        .placeHolder(R.mipmap.ic_launcher_round)
-                        .into(holder.getImageView());
-
-                return convertView;
-            }
-        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        vangogh.pause();
-        vangogh.clearPendingRequests();
-        vangogh.quit();
     }
 
     static final class ViewHolder {

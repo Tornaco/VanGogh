@@ -9,7 +9,7 @@ import org.newstand.logger.Logger;
 
 import java.io.IOException;
 
-import dev.tornaco.vangogh.VangoghContext;
+import dev.tornaco.vangogh.VangoghConfig;
 import dev.tornaco.vangogh.common.Error;
 import dev.tornaco.vangogh.media.BitmapImage;
 import dev.tornaco.vangogh.media.Image;
@@ -39,7 +39,7 @@ class ContentLoader extends BaseImageLoader {
 
         Bitmap bitmap = null;
         try {
-            bitmap = BitmapUtil.decodeUri(VangoghContext.getContext(), Uri.parse(source.getUrl()));
+            bitmap = BitmapUtil.decodeUri(source.getContext(), Uri.parse(source.getUrl()));
         } catch (IOException e) {
             Error error = Error.io(e);
             if (observer != null) {
@@ -50,7 +50,7 @@ class ContentLoader extends BaseImageLoader {
 
         Logger.i("decodeFile bitmap: %s", bitmap);
 
-        Image image = new BitmapImage(bitmap);
+        Image image = new BitmapImage(bitmap, "content");
         if (observer != null) {
             observer.onImageReady(image);
         }

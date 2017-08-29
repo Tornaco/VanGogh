@@ -1,7 +1,6 @@
 package dev.tornaco.vangogh.loader;
 
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -10,7 +9,6 @@ import org.newstand.logger.Logger;
 import java.io.File;
 import java.io.IOException;
 
-import dev.tornaco.vangogh.VangoghContext;
 import dev.tornaco.vangogh.common.Error;
 import dev.tornaco.vangogh.media.BitmapImage;
 import dev.tornaco.vangogh.media.Image;
@@ -55,7 +53,7 @@ public class FileLoader extends BaseImageLoader {
 
         Bitmap bitmap = null;
         try {
-            bitmap = BitmapUtil.decodeFile(VangoghContext.getContext(), filePath);
+            bitmap = BitmapUtil.decodeFile(source.getContext(), filePath);
         } catch (IOException e) {
             Error error = Error.io(e);
             if (observer != null) {
@@ -66,7 +64,7 @@ public class FileLoader extends BaseImageLoader {
 
         Logger.i("decodeFile bitmap: %s", bitmap);
 
-        Image image = new BitmapImage(bitmap);
+        Image image = new BitmapImage(bitmap, "file");
         if (observer != null) {
             observer.onImageReady(image);
         }

@@ -1,11 +1,8 @@
 package dev.tornaco.vangogh.loader.cache;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
-import junit.framework.Assert;
 
 import org.newstand.logger.Logger;
 
@@ -14,36 +11,24 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import dev.tornaco.vangogh.VangoghContext;
 import dev.tornaco.vangogh.loader.BitmapUtil;
 import dev.tornaco.vangogh.media.BitmapImage;
 import dev.tornaco.vangogh.media.Image;
 import dev.tornaco.vangogh.media.ImageSource;
-import lombok.Getter;
 
 /**
  * Created by guohao4 on 2017/8/28.
  * Email: Tornaco@163.com
  */
 
-public class DiskCache implements Cache<ImageSource, Image> {
-
-    private static DiskCache sMe;
+class DiskCache implements Cache<ImageSource, Image> {
 
     private File cacheDir;
 
     private final Object lock = new Object();
 
-    @Getter
-    private Context context;
-
-    DiskCache(CachePolicy cachePolicy) {
-        this.cacheDir = cachePolicy.getDiskCacheDir();
-    }
-
-    static synchronized DiskCache init(CachePolicy cachePolicy) {
-        if (sMe == null) sMe = new DiskCache(cachePolicy);
-        return sMe;
+    DiskCache(File cacheDir) {
+        this.cacheDir = cacheDir;
     }
 
     private String createFileNameFromSource(ImageSource source) {
@@ -58,7 +43,8 @@ public class DiskCache implements Cache<ImageSource, Image> {
         File cacheFile = new File(filePath);
         if (!cacheFile.exists()) return null;
         try {
-            return new BitmapImage(BitmapUtil.decodeFile(VangoghContext.getContext(), filePath));
+            return new BitmapImage(BitmapUtil.decodeFile(source.getContext(), filePath),
+                    "dick-cache");
         } catch (IOException e) {
             Logger.e(e, "Error when decode file");
         }
@@ -71,7 +57,8 @@ public class DiskCache implements Cache<ImageSource, Image> {
     }
 
     private boolean putLocked(@NonNull ImageSource source, @NonNull Image image) {
-        Assert.assertNotNull("Bitmap is null", image.asBitmap(context));
+        if (image.asBitmap(source.getContext()) == null) return false;
+
         String fileName = createFileNameFromSource(source);
         String filePath = cacheDir.getPath() + File.separator + fileName;
         File cacheFile = new File(filePath);
@@ -87,7 +74,7 @@ public class DiskCache implements Cache<ImageSource, Image> {
                 AtomicFileCompat atomicFileCompat = new AtomicFileCompat(cacheFile);
                 FileOutputStream fos = atomicFileCompat.startWrite();
                 //noinspection ConstantConditions
-                if (!image.asBitmap(context).compress(Bitmap.CompressFormat.PNG, 100, fos)) {
+                if (!image.asBitmap(source.getContext()).compress(Bitmap.CompressFormat.PNG, 100, fos)) {
                     atomicFileCompat.failWrite(fos);
                 } else {
                     atomicFileCompat.finishWrite(fos);
@@ -106,10 +93,5 @@ public class DiskCache implements Cache<ImageSource, Image> {
     @Override
     public void clear() {
 
-    }
-
-    @Override
-    public void wire(@NonNull Context context) {
-        this.context = context;
     }
 }

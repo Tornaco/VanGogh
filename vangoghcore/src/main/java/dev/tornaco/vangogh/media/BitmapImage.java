@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import dev.tornaco.vangogh.VangoghContext;
+import lombok.Setter;
 import lombok.ToString;
 
 /**
@@ -18,6 +18,14 @@ import lombok.ToString;
 public class BitmapImage implements Image {
 
     private Bitmap reference;
+
+    @Setter
+    private String alias;
+
+    public BitmapImage(Bitmap reference, String alias) {
+        this.reference = reference;
+        this.alias = alias;
+    }
 
     public BitmapImage(Bitmap bitmap) {
         this.reference = bitmap;
@@ -33,5 +41,18 @@ public class BitmapImage implements Image {
     @Override
     public Drawable asDrawable(@NonNull Context context) {
         return new BitmapDrawable(context.getResources(), asBitmap(context));
+    }
+
+    @Override
+    public void recycle() {
+        if (reference != null && !reference.isRecycled()) {
+            reference.recycle();
+        }
+        reference = null;
+    }
+
+    @Override
+    public boolean cachable() {
+        return true;
     }
 }

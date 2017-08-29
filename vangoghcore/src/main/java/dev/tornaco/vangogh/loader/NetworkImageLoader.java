@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 
 import org.newstand.logger.Logger;
 
-import dev.tornaco.vangogh.VangoghContext;
 import dev.tornaco.vangogh.common.Error;
 import dev.tornaco.vangogh.common.ErrorListener;
 import dev.tornaco.vangogh.common.ProgressListener;
@@ -25,10 +24,6 @@ public class NetworkImageLoader extends BaseImageLoader {
     private FileLoader fileLoader;
 
     public NetworkImageLoader() {
-        this.imageDownloader = new HttpImageDownloader(
-                VangoghContext.getContext().getCacheDir(),
-                null
-        );
         this.fileLoader = new FileLoader();
     }
 
@@ -46,22 +41,23 @@ public class NetworkImageLoader extends BaseImageLoader {
     @Override
     Image doLoad(@NonNull ImageSource source, @Nullable final LoaderObserver observer) {
 
-        String tmpImageFile = imageDownloader.download(source.getUrl(),
-                new ProgressListener() {
-                    @Override
-                    public void onProgressUpdate(float progress) {
-                        if (observer != null) {
-                            observer.onProgressUpdate(progress);
-                        }
-                    }
-                }, new ErrorListener() {
-                    @Override
-                    public void onError(@NonNull Error cause) {
-                        if (observer != null) {
-                            observer.onImageFailure(cause);
-                        }
-                    }
-                });
+        String tmpImageFile = new HttpImageDownloader(source.getContext().getCacheDir(), null)
+                .download(source.getUrl(),
+                        new ProgressListener() {
+                            @Override
+                            public void onProgressUpdate(float progress) {
+                                if (observer != null) {
+                                    observer.onProgressUpdate(progress);
+                                }
+                            }
+                        }, new ErrorListener() {
+                            @Override
+                            public void onError(@NonNull Error cause) {
+                                if (observer != null) {
+                                    observer.onImageFailure(cause);
+                                }
+                            }
+                        });
 
         Logger.v("NetworkImageLoader, tmpImageFile: %s", tmpImageFile);
 
