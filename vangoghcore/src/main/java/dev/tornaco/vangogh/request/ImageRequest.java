@@ -32,7 +32,6 @@ public class ImageRequest {
     private ImageSource imageSource;
     private ImageDisplayer displayer;
     private ImageApplier applier;
-    private ImageEffect[] effect;
 
     private LoaderObserver observer;
 

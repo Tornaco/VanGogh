@@ -24,7 +24,7 @@ public class ImageManager extends Observable {
     @Getter
     private static ImageManager instance = new ImageManager();
 
-    void onImageUsedInvalidate(ImageSource source, Image image) {
+    void onImageReadyToDisplay(ImageSource source, Image image) {
         setChanged();
         notifyObservers(new ImageArgs(source, image));
     }

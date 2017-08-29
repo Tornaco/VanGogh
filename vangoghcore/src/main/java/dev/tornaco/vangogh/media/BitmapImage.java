@@ -7,6 +7,8 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import org.newstand.logger.Logger;
+
 import lombok.Setter;
 import lombok.ToString;
 
@@ -49,10 +51,16 @@ public class BitmapImage implements Image {
             reference.recycle();
         }
         reference = null;
+        Logger.v("BitmapImage, recycle@%s", hashCode());
     }
 
     @Override
     public boolean cachable() {
         return true;
+    }
+
+    @Override
+    public long size() {
+        return (reference == null || reference.isRecycled()) ? 1024 : reference.getWidth() * reference.getHeight();
     }
 }

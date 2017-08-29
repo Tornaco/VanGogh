@@ -16,6 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
 import dev.tornaco.vangogh.common.Error;
+import dev.tornaco.vangogh.display.ImageEffect;
 import dev.tornaco.vangogh.loader.LoaderObserver;
 import dev.tornaco.vangogh.loader.LoaderObserverAdapter;
 import dev.tornaco.vangogh.loader.LoaderProxy;
@@ -85,7 +86,7 @@ public class RequestDispatcherTornaco implements RequestDispatcher {
                     @Override
                     public void onImageReady(@NonNull Image image) {
                         if (observer != null) observer.onImageReady(image);
-                        Logger.v("RequestDispatcherTornaco.LoaderObserverAdapter, onImageUsedInvalidate: %s", image);
+                        Logger.v("RequestDispatcherTornaco.LoaderObserverAdapter, onImageReadyToDisplay: %s", image);
 
                         RequestDispatcherTornaco.this.onImageReady(imageRequest, image);
                     }
@@ -129,8 +130,18 @@ public class RequestDispatcherTornaco implements RequestDispatcher {
     }
 
     private void onImageReady(ImageRequest request, @NonNull Image image) {
-        displayRequestDispatcher
-                .dispatch(new DisplayRequest(image, request, null));
+        DisplayRequest displayRequest = new DisplayRequest(image, request, null);
+        ImageEffect[] effects = displayRequest.getImageSource().getEffect();
+        Image effectedImage = displayRequest.getImage();
+        if (effects != null) {
+            for (ImageEffect e : effects) {
+                effectedImage = e.process(displayRequest.getContext(), effectedImage);
+            }
+            displayRequest.setImage(effectedImage);
+        }
+        displayRequestDispatcher.dispatch(displayRequest);
+        // Publish used image.
+        ImageManager.getInstance().onImageReadyToDisplay(displayRequest.getImageSource(), effectedImage);
     }
 
     private class RequestFuture extends FutureTask<Image> {

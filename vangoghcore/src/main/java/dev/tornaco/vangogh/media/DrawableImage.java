@@ -38,4 +38,9 @@ public class DrawableImage implements Image {
     public boolean cachable() {
         return false;
     }
+
+    @Override
+    public long size() {
+        return 1024;
+    }
 }

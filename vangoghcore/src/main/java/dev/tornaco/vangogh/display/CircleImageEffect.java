@@ -41,7 +41,7 @@ public class CircleImageEffect implements ImageEffect {
         } catch (OutOfMemoryError oom) {
             Logger.e(oom, "Out of memory");
             System.gc();
-            return null;
+            return source;
         }
     }
 }

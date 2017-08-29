@@ -43,16 +43,23 @@ public class ImageViewDisplayer implements ImageDisplayer {
 
     @Override
     public void display(@Nullable Image image) {
-        Drawable drawable = image != null ? image.asDrawable(target.getContext()) : null;
-        if (drawable != null) {
-            target.setImageBitmap(null);
-            target.setImageDrawable(drawable);
-            return;
+        try {
+            Drawable drawable = image != null ? image.asDrawable(target.getContext()) : null;
+            if (drawable != null) {
+                target.setImageBitmap(null);
+                target.setImageDrawable(drawable);
+                return;
+            }
+            Bitmap bitmap = image == null ? null : image.asBitmap(target.getContext());
+            Logger.v("ImageViewDisplayer, display: %s", bitmap);
+            target.setImageDrawable(null);
+            target.setImageBitmap(bitmap);
+        } finally {
+            Image oldImage = DisplayManager.getManager().remove(hashCode());
+            Logger.v("ImageViewDisplayer, oldImage: %s", oldImage);
+            if (oldImage != null) oldImage.recycle();
+            DisplayManager.getManager().put(hashCode(), image);
         }
-        Bitmap bitmap = image == null ? null : image.asBitmap(target.getContext());
-        Logger.v("ImageViewDisplayer, display: %s", bitmap);
-        target.setImageDrawable(null);
-        target.setImageBitmap(bitmap);
     }
 
     @Nullable

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.DrawableRes;
 
 import dev.tornaco.vangogh.VangoghConfig;
+import dev.tornaco.vangogh.display.ImageEffect;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -25,11 +26,22 @@ public class ImageSource implements Cloneable {
     @DrawableRes
     private int fallback;
 
+    private ImageEffect[] effect;
+
     private boolean skipDiskCache;
     private boolean skipMemoryCache;
 
     public ImageSource duplicate() throws CloneNotSupportedException {
         return (ImageSource) clone();
+    }
+
+    private String getEffectClassNames() {
+        if (effect == null) return "";
+        String str = "";
+        for (ImageEffect e : effect) {
+            str += e.getClass().getName();
+        }
+        return str;
     }
 
     @Override
@@ -39,7 +51,10 @@ public class ImageSource implements Cloneable {
 
         ImageSource source = (ImageSource) o;
 
-        return url.equals(source.url);
+        boolean urlEquals = url.equals(source.url);
+        if (!urlEquals) return false;
+
+        return getEffectClassNames().equals(source.getEffectClassNames());
     }
 
     public void recycle() {

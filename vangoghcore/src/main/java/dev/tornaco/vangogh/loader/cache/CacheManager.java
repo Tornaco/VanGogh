@@ -62,13 +62,8 @@ public class CacheManager {
         executorService.execute(new Runnable() {
             @Override
             public void run() {
-                try {
-                    memCache.put(source, image);
-                    diskCache.put(source, image);
-                } finally {
-//                    image.recycle();
-//                    source.recycle();
-                }
+                diskCache.put(source, image);
+                memCache.put(source, image);
             }
         });
     }

@@ -116,7 +116,6 @@ public class Vangogh {
         private ImageSource source;
         private ImageDisplayer imageDisplayer;
         private ImageApplier applier;
-        private ImageEffect[] effect;
 
         private LoaderObserver observer;
 
@@ -150,7 +149,8 @@ public class Vangogh {
         }
 
         public VangoghRequest effect(ImageEffect... effect) {
-            this.effect = effect;
+            Assert.assertNotNull("Set image source first", source);
+            this.source.setEffect(effect);
             return this;
         }
 
@@ -196,7 +196,6 @@ public class Vangogh {
                             .displayer(this.imageDisplayer)
                             .imageSource(this.source)
                             .applier(applier)
-                            .effect(effect)
                             .id(RequestIdFactory.next())
                             .observer(observer)
                             .build();

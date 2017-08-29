@@ -36,7 +36,7 @@ class DisplayRequestDispatcherTornaco implements DisplayRequestDispatcher {
                 int id = msg.what;
                 DisplayRequest request = (DisplayRequest) msg.obj;
                 if (DIRTY_REQUESTS.contains(id)) {
-                    Logger.v("DisplayRequestDispatcherTornaco, Request :%s is canceled", request);
+                    Logger.v("DisplayRequestDispatcherTornaco, Request: %s is canceled", request);
                     return;
                 }
                 Logger.v("DisplayRequestDispatcherTornaco, Request %s will execute", request);
@@ -57,19 +57,7 @@ class DisplayRequestDispatcherTornaco implements DisplayRequestDispatcher {
                     Logger.v("DisplayRequestDispatcherTornaco, Request of ID:%s is canceled", displayRequest.getId());
                     return;
                 }
-                ImageEffect[] effect = displayRequest.getEffect();
-                Image readyImage = displayRequest.getImage();
-                Image effectedImage = readyImage;
-                if (effect != null) {
-                    for (ImageEffect e : effect) {
-                        effectedImage = e.process(displayRequest.getContext(), effectedImage);
-                    }
-                    displayRequest.setImage(effectedImage);
-                }
                 mainThreadHandler.obtainMessage(displayRequest.getId(), displayRequest).sendToTarget();
-
-                // Publish used image.
-                ImageManager.getInstance().onImageUsedInvalidate(displayRequest.getImageSource(), readyImage);
             }
         });
     }

@@ -28,17 +28,31 @@ class MemoryCache implements Cache<ImageSource, Image> {
             @SuppressWarnings("ConstantConditions")
             @Override
             protected int sizeOf(ImageSource key, Image value) {
-                if (value == null || value.asBitmap(key.getContext()) == null) return 1;
-                return value.asBitmap(key.getContext()).getWidth() * value.asBitmap(key.getContext()).getHeight() + 1;
+                int size = internalSizeOf(key, value);
+                Logger.v("LruCache, size of: %s", size);
+                return size;
+            }
+
+            @Override
+            public void trimToSize(int maxSize) {
+                int size = size();
+                Logger.v("LruCache, trim to size: %s, current: %s", maxSize, size);
+                super.trimToSize(maxSize);
             }
 
             @Override
             protected void entryRemoved(boolean evicted, ImageSource key, Image oldValue, Image newValue) {
                 super.entryRemoved(evicted, key, oldValue, newValue);
-                oldValue.recycle();
+                key = null;
                 oldValue = null;
+                System.gc();
             }
         };
+    }
+
+    private int internalSizeOf(ImageSource key, Image value) {
+        if (value == null) return 1024;
+        return (int) value.size();
     }
 
     @Nullable
@@ -60,7 +74,13 @@ class MemoryCache implements Cache<ImageSource, Image> {
             ((BitmapImage) image).setAlias("in-mem-cache");
         }
 
-        mLruCache.put(source, image);
+        try {
+            mLruCache.put(source, image);
+        } catch (Throwable e) {
+            Logger.e(e, "Fail put to mem cache");
+            mLruCache.evictAll();
+            return false;
+        }
         return true;
     }
 

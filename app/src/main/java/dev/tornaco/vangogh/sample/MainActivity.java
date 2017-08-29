@@ -11,8 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ListView;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import dev.tornaco.vangogh.display.appliers.FadeInApplier;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ListView listView;
+    private GridView listView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupView() {
-        listView = (ListView) findViewById(R.id.list);
+        listView = (GridView) findViewById(R.id.list);
 
         new Thread(new Runnable() {
             @Override
