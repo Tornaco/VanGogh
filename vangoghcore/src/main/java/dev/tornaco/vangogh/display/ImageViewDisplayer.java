@@ -48,12 +48,17 @@ public class ImageViewDisplayer implements ImageDisplayer {
             if (drawable != null) {
                 target.setImageBitmap(null);
                 target.setImageDrawable(drawable);
-                return;
+            } else {
+                Bitmap bitmap = image == null ? null : image.asBitmap(target.getContext());
+                if (bitmap != null) {
+                    target.setImageDrawable(null);
+                    target.setImageBitmap(bitmap);
+                } else {
+                    // Do not bother, we got what we want.
+                    target.setImageDrawable(null);
+                    target.setImageBitmap(null);
+                }
             }
-            Bitmap bitmap = image == null ? null : image.asBitmap(target.getContext());
-            Logger.v("ImageViewDisplayer, display: %s", bitmap);
-            target.setImageDrawable(null);
-            target.setImageBitmap(bitmap);
         } finally {
             Image oldImage = DisplayManager.getManager().remove(hashCode());
             Logger.v("ImageViewDisplayer, oldImage: %s", oldImage);

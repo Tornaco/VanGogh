@@ -1,4 +1,4 @@
-package com.android.audioeffect;
+package com.android.test;
 
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;

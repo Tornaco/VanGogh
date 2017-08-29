@@ -5,10 +5,15 @@ import android.net.Uri;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ImageView;
 
 import junit.framework.Assert;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import dev.tornaco.vangogh.display.ImageApplier;
@@ -22,6 +27,7 @@ import dev.tornaco.vangogh.media.ImageSource;
 import dev.tornaco.vangogh.request.ImageRequest;
 import dev.tornaco.vangogh.request.RequestDispatcherTornaco;
 import dev.tornaco.vangogh.request.RequestLooper;
+import dev.tornaco.vangogh.widget.AbsListViewScrollDetector;
 import lombok.Getter;
 
 /**
@@ -34,6 +40,63 @@ public class Vangogh {
     private static final Vangogh sMe = new Vangogh();
 
     private RequestLooper mLooper;
+
+    private static final Map<View, Object> ABS_LIST_DETECTORS = new HashMap<>();
+
+    public static Vangogh unLinkScrollState(@NonNull View view) {
+        Assert.assertNotNull(view);
+        ABS_LIST_DETECTORS.remove(view);
+        return sMe;
+    }
+
+    public static Vangogh linkScrollState(@NonNull RecyclerView recyclerView) {
+        Assert.assertNotNull(recyclerView);
+        RecyclerView.OnScrollListener listener = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                switch (newState) {
+                    case RecyclerView.SCROLL_STATE_IDLE:
+                        resume();
+                        break;
+                    default:
+                        pause();
+                        break;
+                }
+            }
+        };
+        ABS_LIST_DETECTORS.put(recyclerView, listener);
+        recyclerView.addOnScrollListener(listener);
+        return sMe;
+    }
+
+    public static Vangogh linkScrollState(@NonNull AbsListView absListView) {
+        Assert.assertNotNull(absListView);
+
+        if (ABS_LIST_DETECTORS.containsKey(absListView)) return sMe;
+
+        AbsListViewScrollDetector absListViewScrollDetector = new AbsListViewScrollDetector();
+        absListViewScrollDetector.setListView(absListView);
+        absListViewScrollDetector.setScrollThreshold(30);
+        absListViewScrollDetector.setCallback(new AbsListViewScrollDetector.Callback() {
+            @Override
+            public void onScrollUp() {
+                pause();
+            }
+
+            @Override
+            public void onScrollDown() {
+                pause();
+            }
+
+            @Override
+            public void onIdle() {
+                resume();
+            }
+        });
+        ABS_LIST_DETECTORS.put(absListView, absListViewScrollDetector);
+        return sMe;
+    }
 
     /**
      * @param fragment Instance of your fragment.

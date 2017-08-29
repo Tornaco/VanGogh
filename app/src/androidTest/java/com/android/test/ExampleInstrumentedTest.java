@@ -1,4 +1,4 @@
-package com.android.audioeffect;
+package com.android.test;
 
 import android.content.Context;
 import android.net.Uri;

@@ -53,14 +53,15 @@ public class RequestDispatcherTornaco implements RequestDispatcher {
 
         // Apply placeholder.
         final ImageSource source = imageRequest.getImageSource();
-        if (source.getPlaceHolder() > 0) {
-            Drawable placeHolderDrawable = imageRequest.getContext().getResources()
-                    .getDrawable(source.getPlaceHolder());
-            if (placeHolderDrawable != null) {
-                displayRequestDispatcher.dispatch(new DisplayRequest(
-                        new DrawableImage(placeHolderDrawable),
-                        imageRequest, "no-applier"));
-            }
+        if (source.getPlaceHolder() >= 0) {
+            Drawable placeHolderDrawable =
+                    source.getPlaceHolder() > 0 ?
+                            imageRequest.getContext().getResources()
+                                    .getDrawable(source.getPlaceHolder())
+                            : null;
+            displayRequestDispatcher.dispatch(new DisplayRequest(
+                    new DrawableImage(placeHolderDrawable),
+                    imageRequest, "no-applier"));
         }
 
         cancel(imageRequest, true);

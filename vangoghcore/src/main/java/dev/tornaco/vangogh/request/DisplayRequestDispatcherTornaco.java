@@ -12,15 +12,15 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import dev.tornaco.vangogh.display.ImageEffect;
-import dev.tornaco.vangogh.media.Image;
-
 /**
  * Created by guohao4 on 2017/8/25.
  * Email: Tornaco@163.com
  */
 
 class DisplayRequestDispatcherTornaco implements DisplayRequestDispatcher {
+
+    private static final int MSG_DISPLAY = 0x1;
+    private static final int MSG_DISPLAY_COMPLETE = 0x2;
 
     private final Handler mainThreadHandler;
 
@@ -41,9 +41,10 @@ class DisplayRequestDispatcherTornaco implements DisplayRequestDispatcher {
                 }
                 Logger.v("DisplayRequestDispatcherTornaco, Request %s will execute", request);
 
-                request.run();
+                request.callApply();
             }
         };
+
         this.executorService = Executors.newSingleThreadExecutor();
     }
 
@@ -61,7 +62,6 @@ class DisplayRequestDispatcherTornaco implements DisplayRequestDispatcher {
             }
         });
     }
-
 
     @Override
     public boolean cancel(@NonNull DisplayRequest displayRequest, boolean interruptRunning) {

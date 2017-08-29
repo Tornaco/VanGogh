@@ -19,6 +19,8 @@ import java.util.List;
 import dev.tornaco.vangogh.Vangogh;
 import dev.tornaco.vangogh.display.CircleImageEffect;
 import dev.tornaco.vangogh.display.appliers.FadeInApplier;
+import dev.tornaco.vangogh.display.appliers.ScaleInBottomApplier;
+import dev.tornaco.vangogh.display.appliers.ScaleInXYApplier;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -106,11 +108,16 @@ public class MainActivity extends AppCompatActivity {
                                     holder = (ViewHolder) convertView.getTag();
                                 }
 
+//                                Vangogh.linkScrollState(listView);
+//
+//                                holder.getImageView().setImageBitmap(null);
+//                                holder.getImageView().setImageDrawable(null);
+
                                 Vangogh.with(getApplicationContext())
                                         .load(photos.get(position).getPath())
                                         .effect(new CircleImageEffect())
-                                        .applier(new FadeInApplier())
-                                        .placeHolder(R.mipmap.ic_launcher_round)
+                                        .applier(new ScaleInXYApplier())
+                                        .placeHolder(0)
                                         .into(holder.getImageView());
 
                                 return convertView;

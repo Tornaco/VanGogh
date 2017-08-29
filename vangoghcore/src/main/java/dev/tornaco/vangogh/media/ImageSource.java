@@ -22,7 +22,7 @@ public class ImageSource implements Cloneable {
 
     private String url;
     @DrawableRes
-    private int placeHolder;
+    private int placeHolder = -1;
     @DrawableRes
     private int fallback;
 
