@@ -25,21 +25,6 @@ class MemoryCache implements Cache<ImageSource, Image> {
         Logger.v("MemoryCache, using pool size: %s", poolSize);
 
         mLruCache = new LruCache<ImageSource, Image>(poolSize) {
-            @SuppressWarnings("ConstantConditions")
-            @Override
-            protected int sizeOf(ImageSource key, Image value) {
-                int size = internalSizeOf(key, value);
-                Logger.v("LruCache, size of: %s", size);
-                return size;
-            }
-
-            @Override
-            public void trimToSize(int maxSize) {
-                int size = size();
-                Logger.v("LruCache, trim to size: %s, current: %s", maxSize, size);
-                super.trimToSize(maxSize);
-            }
-
             @Override
             protected void entryRemoved(boolean evicted, ImageSource key, Image oldValue, Image newValue) {
                 super.entryRemoved(evicted, key, oldValue, newValue);

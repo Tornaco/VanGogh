@@ -37,12 +37,12 @@
 
 
     <GridView
-        android:fadeScrollbars="true"
         android:id="@+id/list"
-        android:numColumns="1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@id/button_container" />
+        android:layout_below="@id/button_container"
+        android:fastScrollEnabled="true"
+        android:numColumns="1" />
 </RelativeLayout>

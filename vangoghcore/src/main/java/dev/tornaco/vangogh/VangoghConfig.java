@@ -31,7 +31,7 @@ public class VangoghConfig {
                 .builder()
                 .context(context)
                 .diskCacheDir(new File(context.getCacheDir().getPath() + File.separator + "disk_cache"))
-                .memCachePoolSize((int) (Runtime.getRuntime().maxMemory() / 16))
+                .memCachePoolSize(64)
                 .requestPoolSize(Runtime.getRuntime().availableProcessors() / 4)
                 .build();
     }
