@@ -3,6 +3,8 @@ package dev.tornaco.vangogh.sample;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +23,10 @@ import dev.tornaco.vangogh.display.CircleImageEffect;
 import dev.tornaco.vangogh.display.appliers.FadeInApplier;
 import dev.tornaco.vangogh.display.appliers.ScaleInBottomApplier;
 import dev.tornaco.vangogh.display.appliers.ScaleInXYApplier;
+import dev.tornaco.vangogh.loader.Loader;
+import dev.tornaco.vangogh.loader.LoaderObserver;
+import dev.tornaco.vangogh.media.Image;
+import dev.tornaco.vangogh.media.ImageSource;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -119,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
                                         .applier(new ScaleInXYApplier())
                                         .skipMemoryCache(false)
                                         .skipDiskCache(false)
+                                        .usingLoader(new CustomLoader())
                                         .placeHolder(0)
                                         .into(holder.getImageView());
 
@@ -150,4 +157,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    class CustomLoader implements Loader<Image>{
+
+        @Nullable
+        @Override
+        public Image load(@NonNull ImageSource source, @Nullable LoaderObserver observer) {
+            return null;
+        }
+
+        @Override
+        public int priority() {
+            return 3;
+        }
+    }
 }

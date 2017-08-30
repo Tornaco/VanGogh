@@ -80,9 +80,10 @@ public class LoaderProxy {
 
         List<Loader<Image>> usingLoaders = new ArrayList<>(LOADERS.size() + 1);
         usingLoaders.addAll(LOADERS);
+
         if (imageRequest.getLoader() != null) {
             usingLoaders.add(imageRequest.getLoader());
-
+            Logger.v("LoaderProxy, Adding custom loader: %s", imageRequest.getLoader());
             Collections.sort(LOADERS, new Comparator<Loader<Image>>() {
                 @Override
                 public int compare(Loader<Image> l1, Loader<Image> l2) {
@@ -90,6 +91,8 @@ public class LoaderProxy {
                     return -1;
                 }
             });
+        } else {
+            Logger.v("LoaderProxy, No custom loader");
         }
 
         try {
