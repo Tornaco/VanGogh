@@ -21,6 +21,8 @@ public interface Image {
 
     void recycle();
 
+    boolean isRecycled();
+
     boolean cachable();
 
     long size();

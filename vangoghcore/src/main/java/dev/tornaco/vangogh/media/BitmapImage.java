@@ -24,6 +24,8 @@ public class BitmapImage implements Image {
     @Setter
     private String alias;
 
+    private boolean recycled;
+
     public BitmapImage(Bitmap reference, String alias) {
         this.reference = reference;
         this.alias = alias;
@@ -51,7 +53,13 @@ public class BitmapImage implements Image {
             reference.recycle();
         }
         reference = null;
+        recycled = true;
         Logger.v("BitmapImage, recycle@%s", hashCode());
+    }
+
+    @Override
+    public boolean isRecycled() {
+        return recycled;
     }
 
     @Override

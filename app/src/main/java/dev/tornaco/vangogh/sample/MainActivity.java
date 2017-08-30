@@ -117,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
                                         .load(photos.get(position).getPath())
                                         .effect(new CircleImageEffect())
                                         .applier(new ScaleInXYApplier())
+                                        .skipMemoryCache(false)
+                                        .skipDiskCache(false)
                                         .placeHolder(0)
                                         .into(holder.getImageView());
 

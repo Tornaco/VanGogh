@@ -19,6 +19,8 @@ public class WeakBitmapImage implements Image {
 
     private WeakReference<Bitmap> reference;
 
+    private boolean recycled;
+
     public WeakBitmapImage(Bitmap bitmap) {
         this.reference = new WeakReference<>(bitmap);
     }
@@ -40,7 +42,13 @@ public class WeakBitmapImage implements Image {
         if (reference != null && reference.get() != null && !reference.get().isRecycled()) {
             reference.get().recycle();
             reference = null;
+            recycled = true;
         }
+    }
+
+    @Override
+    public boolean isRecycled() {
+        return recycled;
     }
 
     @Override

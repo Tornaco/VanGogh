@@ -35,6 +35,11 @@ public class DrawableImage implements Image {
     }
 
     @Override
+    public boolean isRecycled() {
+        return drawable == null;
+    }
+
+    @Override
     public boolean cachable() {
         return false;
     }

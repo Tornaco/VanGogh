@@ -94,11 +94,15 @@ public class LoaderProxy {
 
         try {
             for (Loader<Image> imageLoader : usingLoaders) {
-                Image image = imageLoader.load(imageRequest.getImageSource(), delegate);
-                Logger.v("LoaderProxy, usingLoader: %s, res: %s", imageLoader, image);
-                if (image != null && (image.asBitmap(imageRequest.getContext()) != null
-                        || image.asDrawable(imageRequest.getContext()) != null))
-                    return image;
+                try {
+                    Image image = imageLoader.load(imageRequest.getImageSource(), delegate);
+                    Logger.v("LoaderProxy, usingLoader: %s, res: %s", imageLoader, image);
+                    if (image != null && (image.asBitmap(imageRequest.getContext()) != null
+                            || image.asDrawable(imageRequest.getContext()) != null))
+                        return image;
+                } catch (Throwable e) {
+                    Logger.e(e, "Error thrown from loader:" + imageLoader);
+                }
             }
         } finally {
             usingLoaders.clear();

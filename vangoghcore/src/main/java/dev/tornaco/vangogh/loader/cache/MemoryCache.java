@@ -35,16 +35,17 @@ class MemoryCache implements Cache<ImageSource, Image> {
         };
     }
 
-    private int internalSizeOf(ImageSource key, Image value) {
-        if (value == null) return 1024;
-        return (int) value.size();
-    }
-
     @Nullable
     @Override
     public Image get(@NonNull ImageSource source) {
         Assert.assertNotNull("Source is null", source);
-        return mLruCache.get(source);
+        Image image = mLruCache.get(source);
+        if (image != null && image.isRecycled()) {
+            Logger.v("MemoryCache, removing recycled cache image");
+            mLruCache.remove(source);
+            return null;
+        }
+        return image;
     }
 
     @Override
