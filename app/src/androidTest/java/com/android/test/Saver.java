@@ -28,9 +28,8 @@ public class Saver {
         while (true) {
             if (download.waitForExists(5000)) {
                 download.click();
-
-                sleep(5000);
-                scrollable.swipeLeft(100);
+                sleep(3000);
+                scrollable.swipeLeft(10);
             }
         }
     }

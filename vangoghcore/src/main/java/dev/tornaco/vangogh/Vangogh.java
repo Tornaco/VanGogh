@@ -258,6 +258,7 @@ public class Vangogh {
                             .alias("abc")
                             .displayer(this.imageDisplayer)
                             .imageSource(this.source)
+                            .loader(this.loader)
                             .applier(applier)
                             .id(RequestIdFactory.next())
                             .observer(observer)
