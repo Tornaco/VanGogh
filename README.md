@@ -32,3 +32,24 @@ compile 'com.github.Tornaco:VanGogh:v0.1-alpha'
                 .usingLoader(new CustomLoader())
                 .into(imageView);
 ```
+
+### Config
+
+The dafault config we used:
+```java
+static VangoghConfig defaultConfig(Context context) {
+        return VangoghConfig
+                .builder()
+                .context(context)
+                .diskCacheDir(new File(context.getCacheDir().getPath() + File.separator + "disk_cache"))
+                .memCachePoolSize(64)
+                .requestPoolSize(Runtime.getRuntime().availableProcessors() / 4)
+                .build();
+    }
+
+```
+
+```java
+VangoghConfig config = xxxx;
+Vangogh.with(context, customConfig)
+```
