@@ -35,7 +35,7 @@ compile 'com.github.Tornaco:VanGogh:v0.1-alpha'
 
 ### Config
 
-The dafault config we used:
+* The dafault config we used:
 ```java
 static VangoghConfig defaultConfig(Context context) {
         return VangoghConfig
@@ -49,6 +49,7 @@ static VangoghConfig defaultConfig(Context context) {
 
 ```
 
+* Use custom config:
 ```java
 VangoghConfig config = xxxx;
 Vangogh.with(context, customConfig)
