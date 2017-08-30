@@ -1,8 +1,14 @@
 # VanGogh
 
-## Design flow
+## Design
+
+### Func design
 
 ![flow](design/func_design.png)
+
+### App demo
+
+![demo](design/app_demo.gif)
 
 ## Usage
 
@@ -25,4 +31,26 @@ compile 'com.github.Tornaco:VanGogh:v0.1-alpha'
                 .skipMemoryCache(true)
                 .usingLoader(new CustomLoader())
                 .into(imageView);
+```
+
+### Config
+
+* The dafault config we used:
+```java
+static VangoghConfig defaultConfig(Context context) {
+        return VangoghConfig
+                .builder()
+                .context(context)
+                .diskCacheDir(new File(context.getCacheDir().getPath() + File.separator + "disk_cache"))
+                .memCachePoolSize(64)
+                .requestPoolSize(Runtime.getRuntime().availableProcessors() / 4)
+                .build();
+    }
+
+```
+
+* Use custom config:
+```java
+VangoghConfig config = xxxx;
+Vangogh.with(context, customConfig)
 ```
