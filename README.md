@@ -1,8 +1,14 @@
 # VanGogh
 
-## Design flow
+## Design
+
+### Func design
 
 ![flow](design/func_design.png)
+
+### App demo
+
+![demo](design/app_demo.gif)
 
 ## Usage
 
