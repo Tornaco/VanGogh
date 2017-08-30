@@ -1,10 +1,18 @@
 # VanGogh
 
+## Design flow
+
+![flow](design/func_design.png)
+
+## Usage
+
 [![](https://jitpack.io/v/Tornaco/VanGogh.svg)](https://jitpack.io/#Tornaco/VanGogh)
 
 ```
 compile 'com.github.Tornaco:VanGogh:v0.1-alpha'
 ```
+
+### API
 
 ```java
  Vangogh.with(InstrumentationRegistry.getContext())
