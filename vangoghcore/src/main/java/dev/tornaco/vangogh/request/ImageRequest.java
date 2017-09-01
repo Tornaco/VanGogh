@@ -39,7 +39,7 @@ public class ImageRequest {
 
     private Loader<Image> loader;
 
-    public void setDirty(boolean dirty) {
+    void setDirty(boolean dirty) {
         this.dirty = dirty;
     }
 

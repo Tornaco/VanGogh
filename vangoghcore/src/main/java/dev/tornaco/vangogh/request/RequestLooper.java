@@ -1,5 +1,6 @@
 package dev.tornaco.vangogh.request;
 
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -15,6 +16,8 @@ import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import dev.tornaco.vangogh.media.DrawableImage;
+import dev.tornaco.vangogh.media.ImageSource;
 import lombok.Getter;
 
 /**
@@ -37,6 +40,8 @@ public class RequestLooper {
 
     private LinkedList<ImageRequest> pendingQueue;
 
+    private DisplayRequestDispatcher directDirectDisplayDispatcher;
+
     @Getter
     private LooperState looperState = LooperState.IDLE;
 
@@ -55,6 +60,7 @@ public class RequestLooper {
         this.looperState = LooperState.LOOPING;
         this.seq = seq;
         this.dispatcher = dispatcher;
+        this.directDirectDisplayDispatcher = DisplayRequestDispatcherTornaco.getInstance();
     }
 
     public static RequestLooper newInstance(RequestDispatcher dispatcher) {
@@ -69,6 +75,19 @@ public class RequestLooper {
 
     public void onNewRequest(@NonNull ImageRequest imageRequest) {
         if (hasQuit.get()) return;
+
+        // Apply placeholder.
+        final ImageSource source = imageRequest.getImageSource();
+        if (source.getPlaceHolder() >= 0) {
+            Drawable placeHolderDrawable =
+                    source.getPlaceHolder() > 0 ?
+                            imageRequest.getContext().getResources()
+                                    .getDrawable(source.getPlaceHolder())
+                            : null;
+            directDirectDisplayDispatcher.dispatch(new DisplayRequest(
+                    new DrawableImage(placeHolderDrawable),
+                    imageRequest, "no-applier"));
+        }
 
         if (looperState == LooperState.PAUSED) {
 

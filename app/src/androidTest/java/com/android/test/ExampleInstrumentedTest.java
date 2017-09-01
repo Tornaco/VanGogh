@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
 
 import dev.tornaco.vangogh.Vangogh;
 import dev.tornaco.vangogh.display.CircleImageEffect;
-import dev.tornaco.vangogh.display.appliers.FadeInApplier;
+import dev.tornaco.vangogh.display.appliers.FadeOutFadeInApplier;
 import dev.tornaco.vangogh.loader.Loader;
 import dev.tornaco.vangogh.loader.LoaderObserver;
 import dev.tornaco.vangogh.media.Image;
@@ -42,7 +42,7 @@ public class ExampleInstrumentedTest {
                 .load(Uri.EMPTY)
                 .placeHolder(R.drawable.ic_home_black_24dp)
                 .fallback(R.drawable.ic_dashboard_black_24dp)
-                .applier(new FadeInApplier())
+                .applier(new FadeOutFadeInApplier())
                 .effect(new CircleImageEffect())
                 .skipDiskCache(false)
                 .skipMemoryCache(true)

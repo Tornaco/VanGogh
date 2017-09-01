@@ -16,11 +16,13 @@ import java.util.concurrent.Executors;
  * Created by guohao4 on 2017/8/25.
  * Email: Tornaco@163.com
  */
+enum DisplayRequestDispatcherTornaco implements DisplayRequestDispatcher {
 
-class DisplayRequestDispatcherTornaco implements DisplayRequestDispatcher {
+    INSTANCE;
 
-    private static final int MSG_DISPLAY = 0x1;
-    private static final int MSG_DISPLAY_COMPLETE = 0x2;
+    public static DisplayRequestDispatcherTornaco getInstance() {
+        return INSTANCE;
+    }
 
     private final Handler mainThreadHandler;
 

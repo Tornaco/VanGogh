@@ -3,10 +3,8 @@ package dev.tornaco.vangogh.display.appliers;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.annotation.SuppressLint;
 import android.support.annotation.NonNull;
-
-import org.newstand.logger.Logger;
+import android.view.animation.AccelerateInterpolator;
 
 import dev.tornaco.vangogh.display.ImageApplier;
 import dev.tornaco.vangogh.display.ImageDisplayer;
@@ -17,20 +15,32 @@ import dev.tornaco.vangogh.media.Image;
  * Email: Tornaco@163.com
  */
 
-public class FadeInApplier implements ImageApplier {
+public class FadeOutFadeInApplier implements ImageApplier {
 
-    @SuppressLint("ObjectAnimatorBinding")
+    private long duration;
+
+    public FadeOutFadeInApplier() {
+        this(500);
+    }
+
+    public FadeOutFadeInApplier(long duration) {
+        this.duration = duration;
+    }
+
     @Override
     public void apply(@NonNull final ImageDisplayer displayer, @NonNull final Image image) {
-        Logger.v("FadeInApplier, apply to: %s", displayer);
-        ObjectAnimator animator = ObjectAnimator.ofFloat(displayer, "alpha", 1f, 0f);
+        ObjectAnimator animator = ObjectAnimator.ofFloat(displayer.getView(), "alpha", 1f, 0f);
         animator.setDuration(150);
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
                 displayer.display(image);
-                ObjectAnimator.ofFloat(displayer, "alpha", 0f, 1f).start();
+                ObjectAnimator fadeIn = ObjectAnimator.ofFloat(displayer.getView(), "alpha", 0f, 1f)
+                        .setDuration(duration);
+                fadeIn.setInterpolator(new AccelerateInterpolator());
+                fadeIn.start();
+
             }
         });
         animator.start();
@@ -38,6 +48,6 @@ public class FadeInApplier implements ImageApplier {
 
     @Override
     public long duration() {
-        return 500;
+        return duration;
     }
 }

@@ -1,12 +1,12 @@
 package dev.tornaco.vangogh.sample;
 
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -20,11 +20,10 @@ import java.util.List;
 
 import dev.tornaco.vangogh.Vangogh;
 import dev.tornaco.vangogh.display.CircleImageEffect;
-import dev.tornaco.vangogh.display.appliers.FadeInApplier;
-import dev.tornaco.vangogh.display.appliers.ScaleInBottomApplier;
-import dev.tornaco.vangogh.display.appliers.ScaleInXYApplier;
+import dev.tornaco.vangogh.display.appliers.FadeOutFadeInApplier;
 import dev.tornaco.vangogh.loader.Loader;
 import dev.tornaco.vangogh.loader.LoaderObserver;
+import dev.tornaco.vangogh.loader.LoaderObserverAdapter;
 import dev.tornaco.vangogh.media.Image;
 import dev.tornaco.vangogh.media.ImageSource;
 
@@ -44,8 +43,27 @@ public class MainActivity extends AppCompatActivity {
             @TargetApi(Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent intent = new Intent();
+//                intent.setAction(Intent.ACTION_VIEW);
+//                intent.setData(Uri.parse("http://www.baidu.com"));
+//                startActivity(intent);
+
+//                intent.setAction(Intent.ACTION_CALL);
+//                intent.setData(Uri.parse("tel://1234444"));
+//                startActivity(intent);
+
+//                intent.setAction(Intent.ACTION_SENDTO);
+//                intent.setData(Uri.parse("smsto:1222"));
+//                startActivity(intent);
+
+                intent.setAction(Intent.ACTION_VIEW);
+                intent.putExtra("key1", 12);
+                intent.putExtra("key2", true);
+                intent.putExtra("key3", "Hello");
+                Photo photo = new Photo("XXX", "/sdcard/xxx.png");
+                intent.putExtra("key4", photo);
+
+                startActivity(intent);
             }
         });
 
@@ -76,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupView() {
         listView = (GridView) findViewById(R.id.list);
+
+        listView.setNumColumns(1);
 
         new Thread(new Runnable() {
             @Override
@@ -114,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                                     holder = (ViewHolder) convertView.getTag();
                                 }
 
-//                                Vangogh.linkScrollState(listView);
+                                // Vangogh.linkScrollState(listView);
 //
 //                                holder.getImageView().setImageBitmap(null);
 //                                holder.getImageView().setImageDrawable(null);
@@ -122,11 +142,13 @@ public class MainActivity extends AppCompatActivity {
                                 Vangogh.with(getApplicationContext())
                                         .load(photos.get(position).getPath())
                                         .effect(new CircleImageEffect())
-                                        .applier(new ScaleInXYApplier())
+                                        .applier(new FadeOutFadeInApplier())
                                         .skipMemoryCache(false)
                                         .skipDiskCache(false)
                                         .usingLoader(new CustomLoader())
                                         .placeHolder(0)
+                                        .fallback(R.mipmap.ic_launcher_round)
+                                        .observer(new LoaderObserverAdapter())
                                         .into(holder.getImageView());
 
                                 return convertView;
@@ -157,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    class CustomLoader implements Loader<Image>{
+    class CustomLoader implements Loader<Image> {
 
         @Nullable
         @Override

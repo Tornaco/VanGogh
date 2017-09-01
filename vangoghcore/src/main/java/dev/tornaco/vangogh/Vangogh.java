@@ -25,7 +25,7 @@ import dev.tornaco.vangogh.loader.LoaderObserver;
 import dev.tornaco.vangogh.media.Image;
 import dev.tornaco.vangogh.media.ImageSource;
 import dev.tornaco.vangogh.request.ImageRequest;
-import dev.tornaco.vangogh.request.RequestDispatcherTornaco;
+import dev.tornaco.vangogh.request.LoadRequestDispatcherTornaco;
 import dev.tornaco.vangogh.request.RequestLooper;
 import dev.tornaco.vangogh.widget.AbsListViewScrollDetector;
 import lombok.Getter;
@@ -129,7 +129,7 @@ public class Vangogh {
         VangoghConfigManager.getInstance().updateConfig(config);
 
         if (mLooper == null) {
-            mLooper = RequestLooper.newInstance(new RequestDispatcherTornaco(config.getRequestPoolSize()));
+            mLooper = RequestLooper.newInstance(new LoadRequestDispatcherTornaco(config.getRequestPoolSize()));
         }
 
         VangoghRequest request = new VangoghRequest();
@@ -183,6 +183,8 @@ public class Vangogh {
         private LoaderObserver observer;
 
         private Loader<Image> loader;
+
+        private boolean asBitmap, asDrawable;
 
         public VangoghRequest load(String url) {
             ImageSource source = new ImageSource();
@@ -238,9 +240,21 @@ public class Vangogh {
             return this;
         }
 
+        public VangoghRequest asBitmap() {
+            this.asBitmap = true;
+            this.asDrawable = false;
+            return this;
+        }
+
+        public VangoghRequest asDrawable() {
+            this.asBitmap = false;
+            this.asDrawable = true;
+            return this;
+        }
+
         public ImageRequest into(@NonNull ImageView imageView) {
             Assert.assertNotNull(imageView);
-            return into(new ImageViewDisplayer(imageView));
+            return into(new ImageViewDisplayer(imageView, asBitmap));
         }
 
         public ImageRequest into(@NonNull ImageDisplayer imageDisplayer) {
@@ -255,7 +269,7 @@ public class Vangogh {
                     ImageRequest.builder()
                             .context(context)
                             .requestTimeMills(System.currentTimeMillis())
-                            .alias("abc")
+                            .alias("ir-vango")
                             .displayer(this.imageDisplayer)
                             .imageSource(this.source)
                             .loader(this.loader)
@@ -272,7 +286,7 @@ public class Vangogh {
     private static class RequestIdFactory {
         private static final AtomicInteger S_ID = new AtomicInteger(0);
 
-        public static int next() {
+        static int next() {
             return S_ID.getAndIncrement();
         }
     }

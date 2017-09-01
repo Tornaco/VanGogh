@@ -22,8 +22,11 @@ public class ImageViewDisplayer implements ImageDisplayer {
 
     private ImageView target;
 
-    public ImageViewDisplayer(ImageView target) {
+    private boolean preferUsingBitmap;
+
+    public ImageViewDisplayer(ImageView target, boolean preferUsingBitmap) {
         this.target = target;
+        this.preferUsingBitmap = preferUsingBitmap;
     }
 
     @Override

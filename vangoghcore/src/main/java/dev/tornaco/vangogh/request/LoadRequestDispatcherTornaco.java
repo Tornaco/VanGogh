@@ -1,6 +1,5 @@
 package dev.tornaco.vangogh.request;
 
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
 
@@ -20,7 +19,6 @@ import dev.tornaco.vangogh.display.ImageEffect;
 import dev.tornaco.vangogh.loader.LoaderObserver;
 import dev.tornaco.vangogh.loader.LoaderObserverAdapter;
 import dev.tornaco.vangogh.loader.LoaderProxy;
-import dev.tornaco.vangogh.media.DrawableImage;
 import dev.tornaco.vangogh.media.Image;
 import dev.tornaco.vangogh.media.ImageSource;
 import lombok.Synchronized;
@@ -29,7 +27,7 @@ import lombok.Synchronized;
  * Created by guohao4 on 2017/8/24.
  * Email: Tornaco@163.com
  */
-public class RequestDispatcherTornaco implements RequestDispatcher {
+public class LoadRequestDispatcherTornaco implements RequestDispatcher {
 
     private LoaderProxy proxy;
     private ExecutorService executorService;
@@ -38,31 +36,18 @@ public class RequestDispatcherTornaco implements RequestDispatcher {
 
     private final Map<ImageRequest, RequestFuture> REQUESTS = new HashMap<>();
 
-    public RequestDispatcherTornaco(int poolSize) {
+    public LoadRequestDispatcherTornaco(int poolSize) {
         this.proxy = new LoaderProxy();
         this.executorService = Executors.newFixedThreadPool(poolSize);
-        this.displayRequestDispatcher = new DisplayRequestDispatcherTornaco();
+        this.displayRequestDispatcher = DisplayRequestDispatcherTornaco.getInstance();
     }
 
     @Override
     @Synchronized
     public void dispatch(@NonNull final ImageRequest imageRequest) {
-        Logger.v("RequestDispatcherTornaco, dispatch: %s", imageRequest);
+        Logger.v("LoadRequestDispatcherTornaco, dispatch: %s", imageRequest);
         Assert.assertNotNull("ImageRequest is null", imageRequest);
         Assert.assertNotNull("Image source is null", imageRequest.getImageSource());
-
-        // Apply placeholder.
-        final ImageSource source = imageRequest.getImageSource();
-        if (source.getPlaceHolder() >= 0) {
-            Drawable placeHolderDrawable =
-                    source.getPlaceHolder() > 0 ?
-                            imageRequest.getContext().getResources()
-                                    .getDrawable(source.getPlaceHolder())
-                            : null;
-            displayRequestDispatcher.dispatch(new DisplayRequest(
-                    new DrawableImage(placeHolderDrawable),
-                    imageRequest, "no-applier"));
-        }
 
         cancel(imageRequest, true);
 
@@ -74,22 +59,22 @@ public class RequestDispatcherTornaco implements RequestDispatcher {
                     public void onImageFailure(@NonNull Error error) {
                         super.onImageFailure(error);
                         if (observer != null) observer.onImageFailure(error);
-                        Logger.v("RequestDispatcherTornaco.LoaderObserverAdapter, onImageFailure: %s", error);
+                        Logger.v("LoadRequestDispatcherTornaco.LoaderObserverAdapter, onImageFailure: %s", error);
                     }
 
                     @Override
                     public void onImageLoading(@NonNull ImageSource source) {
                         super.onImageLoading(source);
                         if (observer != null) observer.onImageLoading(source);
-                        Logger.v("RequestDispatcherTornaco.LoaderObserverAdapter, onImageLoading: %s", source);
+                        Logger.v("LoadRequestDispatcherTornaco.LoaderObserverAdapter, onImageLoading: %s", source);
                     }
 
                     @Override
                     public void onImageReady(@NonNull Image image) {
                         if (observer != null) observer.onImageReady(image);
-                        Logger.v("RequestDispatcherTornaco.LoaderObserverAdapter, onImageReadyToDisplay: %s", image);
+                        Logger.v("LoadRequestDispatcherTornaco.LoaderObserverAdapter, onImageReadyToDisplay: %s", image);
 
-                        RequestDispatcherTornaco.this.onImageReady(imageRequest, image);
+                        LoadRequestDispatcherTornaco.this.onImageReady(imageRequest, image);
                     }
                 }));
     }
@@ -99,7 +84,7 @@ public class RequestDispatcherTornaco implements RequestDispatcher {
         imageRequest.setDirty(true);
 
         final RequestFuture future = REQUESTS.remove(imageRequest);
-        Logger.i("RequestDispatcherTornaco, cancel future: %s", future);
+        Logger.i("LoadRequestDispatcherTornaco, cancel future: %s", future);
 
         if (future == null) return false;
 
