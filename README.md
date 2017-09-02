@@ -1,5 +1,11 @@
 # VanGogh
 
+一个简单流畅的的，具有以下feature的加载器：
+1. 自定义的loader。
+2. 自定义的动画 图形效果。
+3. 自定义的Displayer。
+4. 平滑，以及其他基本的参数定义。
+
 ## Design
 
 ### Func design
