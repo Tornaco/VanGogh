@@ -16,13 +16,9 @@
 
 package dev.tornaco.vangogh.media;
 
-import android.media.DecoderCapabilities;
-import android.media.DecoderCapabilities.AudioDecoder;
-import android.media.DecoderCapabilities.VideoDecoder;
 import android.mtp.MtpConstants;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 import lombok.ToString;
@@ -155,30 +151,6 @@ public class MediaFile {
         sFormatToMimeTypeMap.put(mtpFormatCode, mimeType);
     }
 
-    private static boolean isWMAEnabled() {
-        List<AudioDecoder> decoders = DecoderCapabilities.getAudioDecoders();
-        int count = decoders.size();
-        for (int i = 0; i < count; i++) {
-            AudioDecoder decoder = decoders.get(i);
-            if (decoder == AudioDecoder.AUDIO_DECODER_WMA) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean isWMVEnabled() {
-        List<VideoDecoder> decoders = DecoderCapabilities.getVideoDecoders();
-        int count = decoders.size();
-        for (int i = 0; i < count; i++) {
-            VideoDecoder decoder = decoders.get(i);
-            if (decoder == VideoDecoder.VIDEO_DECODER_WMV) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     static {
         addFileType("MP3", FILE_TYPE_MP3, "audio/mpeg", MtpConstants.FORMAT_MP3);
         addFileType("MPGA", FILE_TYPE_MP3, "audio/mpeg", MtpConstants.FORMAT_MP3);
@@ -186,9 +158,7 @@ public class MediaFile {
         addFileType("WAV", FILE_TYPE_WAV, "audio/x-wav", MtpConstants.FORMAT_WAV);
         addFileType("AMR", FILE_TYPE_AMR, "audio/amr");
         addFileType("AWB", FILE_TYPE_AWB, "audio/amr-wb");
-        if (isWMAEnabled()) {
-            addFileType("WMA", FILE_TYPE_WMA, "audio/x-ms-wma", MtpConstants.FORMAT_WMA);
-        }
+        addFileType("WMA", FILE_TYPE_WMA, "audio/x-ms-wma", MtpConstants.FORMAT_WMA);
         addFileType("OGG", FILE_TYPE_OGG, "audio/ogg", MtpConstants.FORMAT_OGG);
         addFileType("OGG", FILE_TYPE_OGG, "application/ogg", MtpConstants.FORMAT_OGG);
         addFileType("OGA", FILE_TYPE_OGG, "application/ogg", MtpConstants.FORMAT_OGG);
@@ -221,10 +191,8 @@ public class MediaFile {
         addFileType("TS", FILE_TYPE_MP2TS, "video/mp2ts");
         addFileType("AVI", FILE_TYPE_AVI, "video/avi");
 
-        if (isWMVEnabled()) {
-            addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv", MtpConstants.FORMAT_WMV);
-            addFileType("ASF", FILE_TYPE_ASF, "video/x-ms-asf");
-        }
+        addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv", MtpConstants.FORMAT_WMV);
+        addFileType("ASF", FILE_TYPE_ASF, "video/x-ms-asf");
 
         addFileType("JPG", FILE_TYPE_JPEG, "image/jpeg", MtpConstants.FORMAT_EXIF_JPEG);
         addFileType("JPEG", FILE_TYPE_JPEG, "image/jpeg", MtpConstants.FORMAT_EXIF_JPEG);
