@@ -163,6 +163,15 @@ public class Vangogh {
     }
 
     /**
+     * Cancel all requests.
+     *
+     * @param interruptRunning {@code true} if you want to interrupt running tasks.
+     */
+    public static void cancelAllRequest(boolean interruptRunning) {
+        sMe.mLooper.cancelAll(interruptRunning);
+    }
+
+    /**
      * Quit and clean up.
      */
     public static void quit() {

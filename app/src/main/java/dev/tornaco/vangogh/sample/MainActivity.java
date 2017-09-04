@@ -15,10 +15,13 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
+import java.io.File;
 import java.util.List;
 
 import dev.tornaco.vangogh.Vangogh;
+import dev.tornaco.vangogh.VangoghConfig;
 import dev.tornaco.vangogh.display.CircleImageEffect;
 import dev.tornaco.vangogh.display.appliers.FadeOutFadeInApplier;
 import dev.tornaco.vangogh.loader.Loader;
@@ -134,19 +137,25 @@ public class MainActivity extends AppCompatActivity {
                                     holder = (ViewHolder) convertView.getTag();
                                 }
 
+                                holder.getTextView().setText(photos.get(position).getName());
+
                                 // Vangogh.linkScrollState(listView);
 //
 //                                holder.getImageView().setImageBitmap(null);
 //                                holder.getImageView().setImageDrawable(null);
 
-                                Vangogh.with(getApplicationContext())
+                                Vangogh.with(getApplicationContext(), VangoghConfig.builder()
+                                        .context(getApplicationContext()).requestPoolSize(1)
+                                        .diskCacheDir(new File(getCacheDir().getPath() + File.separator + "disk_cache"))
+                                        .memCachePoolSize(64)
+                                        .build())
                                         .load(photos.get(position).getPath())
                                         .effect(new CircleImageEffect())
                                         .applier(new FadeOutFadeInApplier())
-                                        .skipMemoryCache(false)
-                                        .skipDiskCache(false)
+                                        .skipMemoryCache(true)
+                                        .skipDiskCache(true)
                                         .usingLoader(new CustomLoader())
-                                        .placeHolder(0)
+                                        .placeHolder(R.drawable.ic_home_black_24dp)
                                         .fallback(R.mipmap.ic_launcher_round)
                                         .observer(new LoaderObserverAdapter())
                                         .into(holder.getImageView());
@@ -165,17 +174,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Vangogh.cancelAllRequest(true);
     }
 
     static final class ViewHolder {
         private ImageView imageView;
+        private TextView textView;
 
         public ViewHolder(View rootView) {
             this.imageView = (ImageView) rootView.findViewById(R.id.imageView);
+            this.textView = (TextView) rootView.findViewById(R.id.textView);
         }
 
         public ImageView getImageView() {
             return imageView;
+        }
+
+        public TextView getTextView() {
+            return textView;
         }
     }
 

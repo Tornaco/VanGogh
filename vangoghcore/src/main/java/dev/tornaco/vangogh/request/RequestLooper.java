@@ -76,6 +76,8 @@ public class RequestLooper {
     public void onNewRequest(@NonNull ImageRequest imageRequest) {
         if (hasQuit.get()) return;
 
+        Logger.v("\n\n------NEW REQUEST COMING------\n\n");
+
         // Apply placeholder.
         final ImageSource source = imageRequest.getImageSource();
         if (source.getPlaceHolder() >= 0) {
@@ -136,6 +138,10 @@ public class RequestLooper {
             imageRequests[i] = (ImageRequest) requests[i];
         }
         return imageRequests;
+    }
+
+    public void cancelAll(boolean interruptRunning) {
+        dispatcher.cancelAll(interruptRunning);
     }
 
     public void resume() {

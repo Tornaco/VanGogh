@@ -1,6 +1,8 @@
 package dev.tornaco.vangogh.loader;
 
 import android.graphics.Bitmap;
+import android.media.ThumbnailUtils;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -13,13 +15,14 @@ import dev.tornaco.vangogh.common.Error;
 import dev.tornaco.vangogh.media.BitmapImage;
 import dev.tornaco.vangogh.media.Image;
 import dev.tornaco.vangogh.media.ImageSource;
+import dev.tornaco.vangogh.media.MediaFile;
 
 /**
  * Created by guohao4 on 2017/8/25.
  * Email: Tornaco@163.com
  */
 
-public class FileLoader extends BaseImageLoader {
+class FileLoader extends BaseImageLoader {
 
     @Override
     boolean canHandleType(@Nullable ImageSource.SourceType type) {
@@ -51,24 +54,40 @@ public class FileLoader extends BaseImageLoader {
             return null;
         }
 
-        Bitmap bitmap = null;
-        try {
-            bitmap = BitmapUtil.decodeFile(source.getContext(), filePath);
-        } catch (IOException e) {
-            Error error = Error.io(e);
-            if (observer != null) {
-                observer.onImageFailure(error);
+        // Get mime type of the file.
+        MediaFile.MediaFileType mediaFileType = MediaFile.getFileType(filePath);
+        Logger.v("FileLoader, mediaFileType: %s", mediaFileType);
+
+        if (mediaFileType != null && MediaFile.isImageFileType(mediaFileType.fileType)) {
+            Bitmap bitmap;
+            try {
+                bitmap = BitmapUtil.decodeFile(source.getContext(), filePath);
+            } catch (IOException e) {
+                Error error = Error.io(e);
+                if (observer != null) {
+                    observer.onImageFailure(error);
+                }
+                return null;
             }
-            return null;
+
+            Image image = new BitmapImage(bitmap, "file");
+            if (observer != null) {
+                observer.onImageReady(image);
+            }
+            return image;
         }
 
-        Logger.i("decodeFile bitmap: %s", bitmap);
-
-        Image image = new BitmapImage(bitmap, "file");
-        if (observer != null) {
-            observer.onImageReady(image);
+        if (mediaFileType != null && MediaFile.isVideoFileType(mediaFileType.fileType)) {
+            Bitmap videoThumb = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Video.Thumbnails.MICRO_KIND);
+            Logger.v("FileLoader, videoThumb: %s", videoThumb);
+            Image image = new BitmapImage(videoThumb);
+            if (observer != null) {
+                observer.onImageReady(image);
+            }
+            return image;
         }
-        return image;
+
+        return null;
     }
 
     @Override

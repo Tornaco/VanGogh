@@ -34,7 +34,7 @@ class ContentLoader extends BaseImageLoader {
     @Nullable
     @Override
     Image doLoad(@NonNull ImageSource source, @Nullable LoaderObserver observer) {
-        Logger.v("FileLoader, doLoad: %s", source);
+        Logger.v("ContentLoader, doLoad: %s", source);
         if (observer != null) observer.onImageLoading(source);
 
         Bitmap bitmap = null;
